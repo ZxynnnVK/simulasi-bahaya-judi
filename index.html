@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Zeus Spin</title>
+  <style>
+    body { background: #111; color: #fff; text-align: center; font-family: sans-serif; padding: 20px; }
+    .reel { display: inline-block; font-size: 50px; background: #333; padding: 20px; border-radius: 10px; margin: 10px; }
+    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    .balance { margin: 15px; font-size: 18px; }
+    .message { font-size: 18px; margin-top: 20px; }
+    .history { background: #222; margin-top: 30px; padding: 15px; border-radius: 10px; max-width: 500px; margin-left: auto; margin-right: auto; }
+  </style>
+</head>
+<body>
+
+  <h1>🎰 Zeus Spin Simulator</h1>
+  <div class="balance">Saldo: <span id="balance">0</span> Koin</div>
+  <button onclick="deposit()">💰 Deposit</button>
+  <button onclick="spin()">🎲 Spin</button>
+
+  <div>
+    <div class="reel" id="r1">❓</div>
+    <div class="reel" id="r2">❓</div>
+    <div class="reel" id="r3">❓</div>
+  </div>
+
+  <div class="message" id="msg">Tekan SPIN untuk bermain.</div>
+
+  <div class="history">
+    <h3>📜 Riwayat Spin</h3>
+    <ul id="historyList" style="text-align: left;"></ul>
+  </div>
+
+  <script>
+    let balance = 0;
+    const symbols = ["⚡", "💰", "👑", "🔱", "🔥", "💎"];
+    const reels = [document.getElementById('r1'), document.getElementById('r2'), document.getElementById('r3')];
+    const msg = document.getElementById('msg');
+    const historyList = document.getElementById('historyList');
+
+    // Load balance & history dari localStorage
+    window.onload = () => {
+      const savedBalance = localStorage.getItem('balance');
+      if (savedBalance) {
+        balance = parseInt(savedBalance);
+        updateBalance();
+      }
+
+      const savedHistory = localStorage.getItem('history');
+      if (savedHistory) {
+        const entries = JSON.parse(savedHistory);
+        entries.forEach(entry => addHistory(entry));
+      }
+    };
+
+    function updateBalance() {
+      document.getElementById("balance").textContent = balance;
+      localStorage.setItem('balance', balance);
+    }
+
+    function deposit() {
+      const amt = prompt("Jumlah deposit:");
+      if (amt && !isNaN(amt)) {
+        balance += parseInt(amt);
+        updateBalance();
+      }
+    }
+
+    function spin() {
+      if (balance < 10) {
+        alert("Saldo tidak cukup.");
+        return;
+      }
+
+      balance -= 10;
+      updateBalance();
+      msg.textContent = "Memutar...";
+
+      const mode = localStorage.getItem('mode') || 'random';
+      let result = [];
+
+      setTimeout(() => {
+        let status = "KALAH";
+
+        if (mode === 'win') {
+          let sym = symbols[Math.floor(Math.random() * symbols.length)];
+          result = [sym, sym, sym];
+          balance += 100;
+          status = "MENANG";
+          msg.textContent = "🎉 Kamu MENANG! +100 Koin";
+        } else if (mode === 'lose') {
+          while (result.length < 3) {
+            let sym = symbols[Math.floor(Math.random() * symbols.length)];
+            if (!result.includes(sym)) result.push(sym);
+          }
+          msg.textContent = "😢 Kamu KALAH.";
+        } else {
+          for (let i = 0; i < 3; i++) {
+            result.push(symbols[Math.floor(Math.random() * symbols.length)]);
+          }
+          if (result[0] === result[1] && result[1] === result[2]) {
+            balance += 100;
+            status = "MENANG";
+            msg.textContent = "🎉 Kamu MENANG! +100 Koin";
+          } else {
+            msg.textContent = "😢 Kamu KALAH.";
+          }
+        }
+
+        for (let i = 0; i < 3; i++) {
+          reels[i].textContent = result[i];
+        }
+
+        updateBalance();
+        saveHistory(result, status);
+      }, 1000);
+    }
+
+    function saveHistory(result, status) {
+      const history = JSON.parse(localStorage.getItem("history") || "[]");
+      const entry = `${result.join(" ")} - ${status}`;
+      history.unshift(entry); // tambahkan ke atas
+      localStorage.setItem("history", JSON.stringify(history));
+      addHistory(entry);
+    }
+
+    function addHistory(text) {
+      const li = document.createElement("li");
+      li.textContent = text;
+      historyList.appendChild(li);
+    }
+  </script>
+</body>
+</html>
