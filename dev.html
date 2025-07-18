@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Developer</title>
+  <style>
+    body { background: #000; color: #0f0; font-family: monospace; text-align: center; padding: 40px; }
+    input, button { padding: 10px; font-size: 16px; margin: 10px; }
+    #panel { display: none; }
+  </style>
+</head>
+<body>
+
+  <h2>🔒 Login Developer</h2>
+  <div id="login">
+    <input type="password" id="password" placeholder="Masukkan Password">
+    <button onclick="login()">Login</button>
+    <div id="wrong" style="color:red;"></div>
+  </div>
+
+  <div id="panel">
+    <h3>🎛️ Panel Kontrol Spin</h3>
+    <button onclick="setMode('win')">Set Menang</button>
+    <button onclick="setMode('lose')">Set Kalah</button>
+    <button onclick="setMode('random')">Set Acak</button>
+    <p>Mode Saat Ini: <span id="currentMode">-</span></p>
+  </div>
+
+  <script>
+    const correctPassword = "zxynnn0103";
+
+    function login() {
+      const input = document.getElementById("password").value;
+      if (input === correctPassword) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+        const mode = localStorage.getItem('mode') || 'random';
+        document.getElementById("currentMode").textContent = mode.toUpperCase();
+      } else {
+        document.getElementById("wrong").textContent = "Password salah!";
+      }
+    }
+
+    function setMode(mode) {
+      localStorage.setItem("mode", mode);
+      document.getElementById("currentMode").textContent = mode.toUpperCase();
+      alert("Mode spin diset ke: " + mode.toUpperCase());
+    }
+  </script>
+</body>
+</html>
